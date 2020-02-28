@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace CorngoBot
 {
+    //https://www.gngrninja.com/code/2019/3/10/c-discord-bot-on-raspberry-pi-simple-bot-with-config-file
     class Program
     {
         public static void Main(string[] args)
