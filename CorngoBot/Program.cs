@@ -11,7 +11,6 @@ using Serilog;
 
 namespace CorngoBot
 {
-    //https://www.gngrninja.com/code/2019/3/10/c-discord-bot-on-raspberry-pi-simple-bot-with-config-file
     class Program
     {
         // setup our fields we assign later
