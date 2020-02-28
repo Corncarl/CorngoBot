@@ -1,133 +1,70 @@
-﻿using System;
-using Discord;
-using Discord.Commands;
+﻿using Discord;
 using Discord.WebSocket;
+using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using Serilog;
 
 namespace CorngoBot
 {
     class Program
     {
-        // setup our fields we assign later
-        private readonly IConfiguration _config;
+        public static void Main(string[] args)
+        => new Program().MainAsync().GetAwaiter().GetResult();
+
+        private Task Log(LogMessage msg)
+        {
+            Console.WriteLine(msg.ToString());
+
+
+
+            return Task.CompletedTask;
+        }
+
         private DiscordSocketClient _client;
-        private static string _logLevel;
-
-        static void Main(string[] args = null)
-        {
-            if (args.Count() != 0)
-            {
-                _logLevel = args[0];
-            }
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("logs/csharpi.log", rollingInterval: RollingInterval.Day)
-                .WriteTo.Console()
-                .CreateLogger();
-
-            new Program().MainAsync().GetAwaiter().GetResult();
-        }
-
-        public Program()
-        {
-            // create the configuration
-            var _builder = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile(path: "config.json");
-
-            // build the configuration and assign to _config          
-            _config = _builder.Build();
-        }
 
         public async Task MainAsync()
         {
-            // call ConfigureServices to create the ServiceCollection/Provider for passing around the services
-            using (var services = ConfigureServices())
+            // When working with events that have Cacheable<IMessage, ulong> parameters,
+            // you must enable the message cache in your config settings if you plan to
+            // use the cached message entity. 
+            var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
+            _client = new DiscordSocketClient(_config);
+
+            //  You can assign your bot token to a string, and pass that in to connect.
+            //  This is, however, insecure, particularly if you plan to have your code hosted in a public repository.
+            var token = "MjY2Mjg5MTI4ODI2NjAxNDcy.Xlg1XQ.iT1r68sw9wwqAuoShiZBkdMIOZU";
+
+            // Some alternative options would be to keep your token in an Environment Variable or a standalone file.
+            // var token = Environment.GetEnvironmentVariable("NameOfYourEnvironmentVariable");
+            // var token = File.ReadAllText("token.txt");
+            // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
+
+            await _client.LoginAsync(TokenType.Bot, token);
+            await _client.StartAsync();
+
+            _client.MessageUpdated += MessageUpdated;
+            _client.Ready += () =>
             {
-                // get the client and assign to client 
-                // you get the services via GetRequiredService<T>
-                var client = services.GetRequiredService<DiscordSocketClient>();
-                _client = client;
+                Console.WriteLine("Bot is connected!");
 
-                // setup logging and the ready event
-                services.GetRequiredService<LoggingService>();
-
-                // this is where we get the Token value from the configuration file, and start the bot
-                await client.LoginAsync(TokenType.Bot, _config["Token"]);
-                await client.StartAsync();
-
-                // we get the CommandHandler class here and call the InitializeAsync method to start things up for the CommandHandler service
-                await services.GetRequiredService<CommandHandler>().InitializeAsync();
-
-                await Task.Delay(-1);
-            }
-        }
-
-        private Task LogAsync(LogMessage log)
-        {
-            Console.WriteLine(log.ToString());
-            return Task.CompletedTask;
-        }
-
-        private Task ReadyAsync()
-        {
-            Console.WriteLine($"Connected as -> [{_client.CurrentUser}] :)");
-            return Task.CompletedTask;
-        }
-
-        // this method handles the ServiceCollection creation/configuration, and builds out the service provider we can call on later
-        private ServiceProvider ConfigureServices()
-        {
-            // this returns a ServiceProvider that is used later to call for those services
-            // we can add types we have access to here, hence adding the new using statement:
-            // using csharpi.Services;
-            // the config we build is also added, which comes in handy for setting the command prefix!
-            var services = new ServiceCollection()
-                .AddSingleton(_config)
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandler>()
-                .AddSingleton<LoggingService>()
-                .AddLogging(configure => configure.AddSerilog());
-
-            if (!string.IsNullOrEmpty(_logLevel))
-            {
-                switch (_logLevel.ToLower())
+                foreach (SocketGuild server in _client.Guilds)
                 {
-                    case "info":
-                        {
-                            services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
-                            break;
-                        }
-                    case "error":
-                        {
-                            services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Error);
-                            break;
-                        }
-                    case "debug":
-                        {
-                            services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Debug);
-                            break;
-                        }
-                    default:
-                        {
-                            services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Error);
-                            break;
-                        }
+                    Console.WriteLine(server.Name + ", " + server.Id);
                 }
-            }
-            else
-            {
-                services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
-            }
 
-            var serviceProvider = services.BuildServiceProvider();
-            return serviceProvider;
+                return Task.CompletedTask;
+            };
+
+            
+
+            // Block this task until the program is closed.
+            await Task.Delay(-1);
         }
 
+        private async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channel)
+        {
+            // If the message was not in the cache, downloading it will result in getting a copy of `after`.
+            var message = await before.GetOrDownloadAsync();
+            Console.WriteLine($"{message} -> {after}");
+        }
     }
 }
