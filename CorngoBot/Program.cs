@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Serilog;
+using System.Collections.Generic;
+using System.IO;
 
 namespace CorngoBot
 {
@@ -17,6 +19,16 @@ namespace CorngoBot
         private readonly IConfiguration _config;
         private DiscordSocketClient _client;
         private static string _logLevel;
+
+        public static readonly List<String> exampleStrings = getSrings();
+
+        private static List<string> getSrings()
+        {
+            var exampleFile = File.ReadAllLines("example.txt");
+            var exampleStrings = new List<String>(exampleFile);
+
+            return exampleStrings;
+        }
 
         static void Main(string[] args = null)
         {
@@ -128,6 +140,5 @@ namespace CorngoBot
             var serviceProvider = services.BuildServiceProvider();
             return serviceProvider;
         }
-
     }
 }

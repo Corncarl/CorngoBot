@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -51,10 +52,39 @@ namespace CorngoBot
             await channel.SendFileAsync(vsauce[rndImg]);
         }
 
-        [Command("jose")]
-        public async Task Jose()
+        [Command("example")]
+        public async Task Example()
         {
-            await Context.Channel.SendMessageAsync("fuck Jose", true);
+            //await Context.Channel.SendMessageAsync("rrrr", true);
+
+            String example = Program.exampleStrings[2];
+
+            var exampleEmbed = new EmbedBuilder();
+            var color = randomColorHex();
+
+            exampleEmbed.WithColor(color);
+            exampleEmbed.WithTitle("Testing Title");
+
+            exampleEmbed.ImageUrl = example;
+
+            var channel = Context.Channel;
+            await channel.SendMessageAsync(" ", false, exampleEmbed.Build());
+            
+
+            //await channel.SendMessageAsync(example, false, Discord.Embed);
+
+            //await ReplyAsync(example);
+        }
+
+        //Generate a random color hex value
+        public UInt32 randomColorHex()
+        {
+            //Generate random hex value for color
+            var random = new Random();
+            var colorStr = String.Format("0x{0:X6}", random.Next(0x1000000));
+            var color = Convert.ToUInt32(colorStr, 16);
+
+            return color;
         }
     }
 }
