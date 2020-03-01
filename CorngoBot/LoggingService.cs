@@ -34,8 +34,11 @@ namespace CorngoBot
         // this method executes on the bot being connected/ready
         public Task OnReadyAsync()
         {
-            _logger.LogInformation($"Connected as -> [] :)");
-            _logger.LogInformation($"We are on [] servers");
+            String botName = _discord.CurrentUser.Username;
+            int numConnections = _discord.Guilds.Count; 
+
+            _logger.LogInformation($"Connected as -> [{botName}]", botName);
+            _logger.LogInformation($"We are on [{numConnections}] servers", numConnections);
             return Task.CompletedTask;
         }
 

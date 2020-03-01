@@ -2,6 +2,8 @@
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +11,10 @@ namespace CorngoBot
 {
     public class Commands : ModuleBase
     {
+        //Call the FaceDetector constructor once
+        private FaceDetector faceDetector = new FaceDetector();
+
+
         [Command("hello")]
         public async Task HelloCommand()
         {
@@ -76,6 +82,39 @@ namespace CorngoBot
             //await ReplyAsync(example);
         }
 
+        [Command("test")]
+        public async Task Test(params string[] args)
+        {
+
+            var channel = Context.Channel;
+            var message = Context.Message.Content;
+
+            if(args.Length < 1)
+            {
+                await channel.SendMessageAsync("Sorry, you didn't use that command right. \n " +
+                    "How to use command: **!test \"Image_URL\"**");
+            }
+            else
+            {
+                String url = args[0];
+
+                if (isImageUrl(url))
+                {
+                    String outputFile = faceDetector.detectFaces(url);
+                    await channel.SendFileAsync(outputFile);
+                }
+                else
+                {
+                    await channel.SendMessageAsync("Sorry, not a valid image URL");
+                }
+            }
+
+
+            //String faces = faceDetector.detectFaces
+
+            
+        }
+
         //Generate a random color hex value
         public UInt32 randomColorHex()
         {
@@ -85,6 +124,18 @@ namespace CorngoBot
             var color = Convert.ToUInt32(colorStr, 16);
 
             return color;
+        }
+
+        //Check if URL is an image
+        bool isImageUrl(string URL)
+        {
+            var req = (HttpWebRequest)HttpWebRequest.Create(URL);
+            req.Method = "HEAD";
+            using (var resp = req.GetResponse())
+            {
+                return resp.ContentType.ToLower(CultureInfo.InvariantCulture)
+                           .StartsWith("image/");
+            }
         }
     }
 }

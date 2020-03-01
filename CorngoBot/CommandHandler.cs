@@ -78,10 +78,14 @@ namespace CorngoBot
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            String userName = context.User.Username;
+            String server = context.Guild.Name;
+
+
             // if a command isn't found, log that info to console and exit this method
             if (!command.IsSpecified)
             {
-                _logger.LogError($"Command failed to execute for [] <-> []!");
+                _logger.LogError($"Command failed to execute for [{userName}] on [{server}]!");
                 return;
             }
 
@@ -89,12 +93,12 @@ namespace CorngoBot
             // log success to the console and exit this method
             if (result.IsSuccess)
             {
-                _logger.LogInformation($"Command [] executed for [] on []");
+                _logger.LogInformation($"Command [{command.Value}] executed for [{userName}] on [{server}]");
                 return;
             }
 
             // failure scenario, let's let the user know
-            await context.Channel.SendMessageAsync($"Sorry, ... something went wrong -> []");
+            await context.Channel.SendMessageAsync($"Sorry ... something went wrong -> [{userName}]");
 
 
         }
