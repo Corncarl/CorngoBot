@@ -20,11 +20,32 @@ namespace CorngoBot
         private DiscordSocketClient _client;
         private static string _logLevel;
 
-        public static readonly List<String> exampleStrings = getSrings();
+        public static readonly List<String> tomokoLinks = getTomokos();
+        public static readonly List<String> vsauceLinks = getVsauces();
+        public static readonly List<String> lLinks = getLs();
 
-        private static List<string> getSrings()
+        //Gets a list of image links from "tomoko.txt"
+        private static List<string> getTomokos()
         {
-            var exampleFile = File.ReadAllLines("example.txt");
+            var exampleFile = File.ReadAllLines("./external_resources/tomoko.txt");
+            var exampleStrings = new List<String>(exampleFile);
+
+            return exampleStrings;
+        }
+
+        //Gets a list of image links from "vsauce.txt"
+        private static List<string> getVsauces()
+        {
+            var exampleFile = File.ReadAllLines("./external_resources/vsauce.txt");
+            var exampleStrings = new List<String>(exampleFile);
+
+            return exampleStrings;
+        }
+
+        //Gets a list of image links from "ls.txt"
+        private static List<string> getLs()
+        {
+            var exampleFile = File.ReadAllLines("./external_resources/ls.txt");
             var exampleStrings = new List<String>(exampleFile);
 
             return exampleStrings;

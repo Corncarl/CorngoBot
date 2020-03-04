@@ -93,7 +93,8 @@ namespace CorngoBot
             // log success to the console and exit this method
             if (result.IsSuccess)
             {
-                _logger.LogInformation($"Command [{command.Value}] executed for [{userName}] on [{server}]");
+                _logger.LogInformation($"Command [{command.Value.Name}] executed by [{userName}] on [{server}]");
+                _logger.LogInformation($"Message: [{context.Message}] \n");
                 return;
             }
 
