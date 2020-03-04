@@ -143,7 +143,7 @@ namespace CorngoBot
             if (args.Length < 1)
             {
                 await ReplyAsync("```Sorry, you didn't use that command right. \n" +
-                   "How to use command: <L \"@user```");
+                   "How to use command: <L @user```");
             }
             else
             {
@@ -194,6 +194,96 @@ namespace CorngoBot
             }
         }
 
+        [Command("congrats")]
+        public async Task Congrats(params string[] args)
+        {
+            var embedSettings = new EmbedBuilder();
+            var color = randomColorHex();
+
+            embedSettings.WithColor(color);
+            embedSettings.ImageUrl = "https://i.imgur.com/6I5BfqZ.gif";
+
+            //Check if any parameters have been passed
+            if (args.Length == 0)
+            {
+                var channel = Context.Channel;
+                await channel.SendMessageAsync("", false, embedSettings.Build());
+            }
+            else
+            {
+                //Check if there have been any mentioned users in the message
+                var mentionedUsers = Context.Message.MentionedUserIds;
+                int numUsersMentioned = 0;
+                String message = "**" + Context.User.Username + "** has congradulated";
+
+                //Build the message while cheking if any users were mentioned
+                foreach (var userID in mentionedUsers)
+                {
+                    var user = Context.Client.GetUserAsync(userID);
+
+                    message += ", **" + user.Result.Username + "**";
+                    numUsersMentioned += 1;
+                }
+
+                if (numUsersMentioned < 1)
+                {
+                    message = "```Sorry, you didn't use that command right. \n" +
+                   "How to use command: <Congrats @user```";
+                }
+
+                embedSettings.WithColor(color);
+                embedSettings.ImageUrl = "https://i.imgur.com/6I5BfqZ.gif";
+                embedSettings.WithDescription(message);
+
+                var channel = Context.Channel;
+                await channel.SendMessageAsync("", false, embedSettings.Build());
+            }
+        }
+
+        [Command("pathetic")]
+        public async Task Pathetic(params string[] args)
+        {
+            List<String> patheticLinks = Program.patheticLinks;
+
+            Random rnd = new Random();
+            var rndImg = rnd.Next(0, patheticLinks.Count);
+
+            var embedSettings = new EmbedBuilder();
+            var color = randomColorHex();
+
+            embedSettings.WithColor(color);
+            embedSettings.ImageUrl = patheticLinks[rndImg];
+
+            //Check if any parameters have been passed
+            if (args.Length < 1)
+            {
+                await ReplyAsync(null, false, embedSettings.Build());
+            }
+            else
+            {
+                //Check if there have been any mentioned users in the message
+                var mentionedUsers = Context.Message.MentionedUserIds;
+                int numUsersMentioned = 0;
+                String message = "";
+
+                //Build the message while cheking if any users were mentioned
+                foreach (var userID in mentionedUsers)
+                {
+                    var user = Context.Client.GetUserAsync(userID);
+
+                    message += "<@" + user.Result.Id + ">  ";
+                    numUsersMentioned += 1;
+                }
+
+                if (numUsersMentioned == 0)
+                {
+                    await ReplyAsync(null, false, embedSettings.Build());
+                }
+
+                await ReplyAsync(message, false, embedSettings.Build());
+            }
+        }
+
         [Command("help")]
         public async Task Help(params string[] args)
         {
@@ -232,7 +322,7 @@ namespace CorngoBot
                 message.AppendLine("```");
                 await channel.SendMessageAsync(message.ToString());
             }
-           
+
         }
 
 

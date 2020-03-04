@@ -23,14 +23,15 @@ namespace CorngoBot
         public static readonly List<String> tomokoLinks = getTomokos();
         public static readonly List<String> vsauceLinks = getVsauces();
         public static readonly List<String> lLinks = getLs();
+        public static readonly List<String> patheticLinks = getPathetics();
 
         //Gets a list of image links from "tomoko.txt"
         private static List<string> getTomokos()
         {
-            var exampleFile = File.ReadAllLines("./external_resources/tomoko.txt");
-            var exampleStrings = new List<String>(exampleFile);
+            var tomokoFile = File.ReadAllLines("./external_resources/tomoko.txt");
+            var tomokoLinks = new List<String>(tomokoFile);
 
-            return exampleStrings;
+            return tomokoLinks;
         }
 
         //Gets a list of image links from "vsauce.txt"
@@ -46,6 +47,15 @@ namespace CorngoBot
         private static List<string> getLs()
         {
             var exampleFile = File.ReadAllLines("./external_resources/ls.txt");
+            var exampleStrings = new List<String>(exampleFile);
+
+            return exampleStrings;
+        }
+
+        //Gets a list of image links from "pathetic.txt"
+        private static List<string> getPathetics()
+        {
+            var exampleFile = File.ReadAllLines("./external_resources/pathetic.txt");
             var exampleStrings = new List<String>(exampleFile);
 
             return exampleStrings;
