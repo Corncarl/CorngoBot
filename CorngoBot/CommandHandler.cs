@@ -86,6 +86,7 @@ namespace CorngoBot
             if (!command.IsSpecified)
             {
                 _logger.LogError($"Command failed to execute for [{userName}] on [{server}]!");
+                _logger.LogInformation($"Message: [{context.Message}] \n");
                 return;
             }
 
@@ -100,6 +101,7 @@ namespace CorngoBot
 
             // failure scenario, let's let the user know
             await context.Channel.SendMessageAsync($"Sorry ... something went wrong -> [{userName}]");
+            _logger.LogInformation($"Message: [{context.Message}] \n");
 
 
         }

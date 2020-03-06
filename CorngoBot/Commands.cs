@@ -206,8 +206,7 @@ namespace CorngoBot
             //Check if any parameters have been passed
             if (args.Length == 0)
             {
-                var channel = Context.Channel;
-                await channel.SendMessageAsync("", false, embedSettings.Build());
+                await ReplyAsync(null, false, embedSettings.Build());
             }
             else
             {
@@ -231,12 +230,9 @@ namespace CorngoBot
                    "How to use command: <Congrats @user```";
                 }
 
-                embedSettings.WithColor(color);
-                embedSettings.ImageUrl = "https://i.imgur.com/6I5BfqZ.gif";
                 embedSettings.WithDescription(message);
 
-                var channel = Context.Channel;
-                await channel.SendMessageAsync("", false, embedSettings.Build());
+                await ReplyAsync(null, false, embedSettings.Build());
             }
         }
 
@@ -284,6 +280,33 @@ namespace CorngoBot
             }
         }
 
+        [Command("uhuh")]
+        public async Task Uhuh(params string[] args)
+        {
+            string message = "That sounds like a ***you*** problem.";
+
+            //Check if any parameters have been passed
+            if (args.Length < 1)
+            {
+                await ReplyAsync(message);
+            }
+            else
+            {
+                //Check if there have been any mentioned users in the message
+                var mentionedUsers = Context.Message.MentionedUserIds;
+
+                //Build the message while cheking if any users were mentioned
+                foreach (var userID in mentionedUsers)
+                {
+                    var user = Context.Client.GetUserAsync(userID);
+
+                    message = message.Insert(0, "**" + user.Result.Username + "**, ");
+                }
+
+                await ReplyAsync(message);
+            }
+        }
+
         [Command("help")]
         public async Task Help(params string[] args)
         {
@@ -324,7 +347,6 @@ namespace CorngoBot
             }
 
         }
-
 
         //Generate a random color hex value
         public UInt32 randomColorHex()
