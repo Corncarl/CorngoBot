@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CorngoBot
@@ -307,6 +308,63 @@ namespace CorngoBot
             }
         }
 
+        [Command("r")]
+        [Alias("roll", "dice")]
+        public async Task Roll(params string[] args)
+        {
+            //Check if any parameters have been passed
+            if (args.Length < 1)
+            {
+                await ReplyAsync("Sorry, you didn't use that command right. \n" +
+                   "Command example: <roll 1d20");
+            }
+            else
+            {
+                var command = args[0];
+                var regex = "^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])[dD]{1}([1-9]|[1-9][0-9]|[1-9][0-9][0-9])$";
+                var match = Regex.Match(command, regex);
+
+                if(match.Success)
+                {
+                    var message = new StringBuilder("Rolling " + command + ": [");
+                    var commandArr = command.ToLower().Split("d");
+
+                    var rolls = int.Parse(commandArr[0]);
+                    var dice = int.Parse(commandArr[1]);
+                    var currRoll = 0;
+                    var diceTotal = 0;
+
+                    Random rnd = new Random();
+                    // = rnd.Next(0, tomokoLinks.Count);
+
+                    for (int i = 0; i < rolls; i++)
+                    {
+                        currRoll = rnd.Next(1, dice);
+
+                        if (i < rolls - 1)
+                        {
+                            message.Append(currRoll + ", ");
+                        }
+                        else
+                        {
+                            message.Append(currRoll + "]```");
+                        }
+
+                        diceTotal += currRoll;
+                    }
+
+                    message.Insert(0, "```Total: " + diceTotal + "\n");
+
+                    await ReplyAsync(message.ToString());
+                }
+                else
+                {
+                    await ReplyAsync("Sorry, you didn't use that command right. \n" +
+                   "Command example: <r 1d20");
+                }
+            }
+        }
+
         [Command("help")]
         public async Task Help(params string[] args)
         {
@@ -363,11 +421,18 @@ namespace CorngoBot
         bool isImageUrl(string URL)
         {
             var req = (HttpWebRequest)HttpWebRequest.Create(URL);
-            req.Method = "HEAD";
-            using (var resp = req.GetResponse())
+            req.Method = "GET";
+            try
             {
-                return resp.ContentType.ToLower(CultureInfo.InvariantCulture)
-                           .StartsWith("image/");
+                using (var resp = req.GetResponse())
+                {
+                    return resp.ContentType.ToLower(CultureInfo.InvariantCulture)
+                               .StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch(Exception e)
+            {
+                return false;
             }
         }
     }

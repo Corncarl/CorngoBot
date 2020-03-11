@@ -39,6 +39,12 @@ namespace CorngoBot
 
             _logger.LogInformation($"Connected as -> [{botName}]", botName);
             _logger.LogInformation($"We are on [{numConnections}] servers", numConnections);
+
+            foreach(var guild in _discord.Guilds)
+            {
+                _logger.LogInformation($"-[{guild}]", guild);
+            }
+
             return Task.CompletedTask;
         }
 

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CorngoBot
@@ -70,6 +71,13 @@ namespace CorngoBot
                 return;
             }
 
+            // Default prefix is '<'
+            // Check if the user is mentioning someone or using an emote since they also start with '<'
+            if((message.Content.Substring(1, 1) == "@") || (message.Content.Substring(1, 1) == ":"))
+            {
+                return;
+            }
+
             var context = new SocketCommandContext(_client, message);
 
             // execute command if one is found that matches
@@ -80,7 +88,6 @@ namespace CorngoBot
         {
             String userName = context.User.Username;
             String server = context.Guild.Name;
-
 
             // if a command isn't found, log that info to console and exit this method
             if (!command.IsSpecified)
