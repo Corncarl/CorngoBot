@@ -15,9 +15,14 @@ namespace CorngoBot
     {
         //Call the FaceDetector constructor once
         private FaceDetector faceDetector = new FaceDetector();
+        private readonly CommandService _service;
 
+        public Commands(CommandService service)
+        {
+            _service = service;
+        }
 
-        [Command("hello")]
+        /*[Command("hello")]
         public async Task HelloCommand()
         {
             // initialize empty string builder for reply
@@ -31,9 +36,10 @@ namespace CorngoBot
 
             // send simple string reply
             await ReplyAsync(sb.ToString());
-        }
+        }*/
 
         [Command("tomoko")]
+        [Summary("Posts a random Tomoko")]
         public async Task Tomoko()
         {
             List<String> tomokoLinks = Program.tomokoLinks;
@@ -61,6 +67,7 @@ namespace CorngoBot
         }
 
         [Command("vsauce")]
+        [Summary("Posts a random VSauce meme")]
         public async Task VSauce()
         {
             List<String> vsauceLinks = Program.vsauceLinks;
@@ -78,7 +85,7 @@ namespace CorngoBot
             await channel.SendMessageAsync("", false, embedSettings.Build());
         }
 
-        [Command("example")]
+        /*[Command("example")]
         public async Task Example()
         {
             //await Context.Channel.SendMessageAsync("rrrr", true);
@@ -100,9 +107,10 @@ namespace CorngoBot
             //await channel.SendMessageAsync(example, false, Discord.Embed);
 
             //await ReplyAsync(example);
-        }
+        }*/
 
         [Command("face")]
+        [Summary("Detects faces in an image")]
         public async Task Face(params string[] args)
         {
 
@@ -138,6 +146,7 @@ namespace CorngoBot
         }
 
         [Command("l")]
+        [Summary("Hand someone an L")]
         public async Task L(params string[] args)
         {
             //Check if any parameters have been passed
@@ -196,6 +205,8 @@ namespace CorngoBot
         }
 
         [Command("congrats")]
+        [Alias("congratulations")]
+        [Summary("Congratulate someone")]
         public async Task Congrats(params string[] args)
         {
             var embedSettings = new EmbedBuilder();
@@ -238,6 +249,7 @@ namespace CorngoBot
         }
 
         [Command("pathetic")]
+        [Summary("Call someone pathetic")]
         public async Task Pathetic(params string[] args)
         {
             List<String> patheticLinks = Program.patheticLinks;
@@ -282,6 +294,7 @@ namespace CorngoBot
         }
 
         [Command("uhuh")]
+        [Summary("Tell someone that sounds like their problem")]
         public async Task Uhuh(params string[] args)
         {
             string message = "That sounds like a ***you*** problem.";
@@ -310,6 +323,7 @@ namespace CorngoBot
 
         [Command("r")]
         [Alias("roll", "dice")]
+        [Summary("Roll a dice")]
         public async Task Roll(params string[] args)
         {
             //Check if any parameters have been passed
@@ -369,6 +383,7 @@ namespace CorngoBot
         public async Task Help(params string[] args)
         {
             var channel = Context.Channel;
+            var commandList = _service.Commands;
 
             if (Context.User.Id.ToString() == "528853927471480833")
             {
@@ -384,7 +399,7 @@ namespace CorngoBot
             else
             {
                 StringBuilder message = new StringBuilder("```");
-                StreamReader helpTxtFile = new StreamReader(@"./external_resources/helpMenu.txt");
+                /*StreamReader helpTxtFile = new StreamReader(@"./external_resources/helpMenu.txt");
                 string currLine;
 
                 while ((currLine = helpTxtFile.ReadLine()) != null)
@@ -400,7 +415,14 @@ namespace CorngoBot
                 helpTxtFile.Close();
                 helpTxtFile.Dispose();
 
-                message.AppendLine("```");
+                message.AppendLine("```");*/
+
+                foreach(var commands in commandList)
+                {
+                    message.AppendLine(String.Format("<{0,-18}{1}", commands.Name, commands.Summary));
+                }
+
+                message.Append("```");
                 await channel.SendMessageAsync(message.ToString());
             }
 
