@@ -1,9 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
+using Imgur.API.Authentication.Impl;
+using Imgur.API.Endpoints.Impl;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,107 +16,40 @@ namespace CorngoBot
 {
     public class Commands : ModuleBase
     {
-        //Call the FaceDetector constructor once
+        //Call the FaceDetector constructor
         private FaceDetector faceDetector = new FaceDetector();
         private readonly CommandService _service;
 
+        private readonly ImgurClient _imgurClient; 
+        private readonly AlbumEndpoint _imgurEndpoint; 
+        
         public Commands(CommandService service)
         {
             _service = service;
+
+            //Setup the imgur client
+            _imgurClient = new ImgurClient("6a6b06d4d75f3d5");
+            _imgurEndpoint = new AlbumEndpoint(_imgurClient);
         }
-
-        /*[Command("hello")]
-        public async Task HelloCommand()
-        {
-            // initialize empty string builder for reply
-            var sb = new StringBuilder();
-
-            // get user info from the Context
-            var user = Context.User;
-
-            // build out the reply
-            sb.AppendLine($"You are -> [" + user.Username + "]");
-
-            // send simple string reply
-            await ReplyAsync(sb.ToString());
-        }*/
 
         [Command("tomoko")]
         [Summary("Posts a random Tomoko")]
         public async Task Tomoko()
         {
-            List<String> tomokoLinks = Program.tomokoLinks;
-
-            var embedSettings = new EmbedBuilder();
-            var color = randomColorHex();
-
-            Random rnd = new Random();
-            var rndImg = rnd.Next(0, tomokoLinks.Count);
-
-            embedSettings.WithColor(color);
-            embedSettings.ImageUrl = tomokoLinks[rndImg];
-
-            var channel = Context.Channel;
-            await channel.SendMessageAsync("", false, embedSettings.Build());
-
-            /*Old code for reference
-            String[] tomoko = System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory + @"\tomoko\");
-            Random rnd = new Random();
-            int rndImg = rnd.Next(0, tomoko.Length);
-
-            var channel = Context.Channel;
-            await channel.SendFileAsync(tomoko[rndImg]);
-            */
+            await ReplyImgur("kFYIYSn");
         }
 
         [Command("vsauce")]
         [Summary("Posts a random VSauce meme")]
         public async Task VSauce()
         {
-            List<String> vsauceLinks = Program.vsauceLinks;
-
-            var embedSettings = new EmbedBuilder();
-            var color = randomColorHex();
-
-            Random rnd = new Random();
-            var rndImg = rnd.Next(0, vsauceLinks.Count);
-
-            embedSettings.WithColor(color);
-            embedSettings.ImageUrl = vsauceLinks[rndImg];
-
-            var channel = Context.Channel;
-            await channel.SendMessageAsync("", false, embedSettings.Build());
+            await ReplyImgur("eVKhixH");
         }
-
-        /*[Command("example")]
-        public async Task Example()
-        {
-            //await Context.Channel.SendMessageAsync("rrrr", true);
-
-            String example = Program.tomokoLinks[2];
-
-            var exampleEmbed = new EmbedBuilder();
-            var color = randomColorHex();
-
-            exampleEmbed.WithColor(color);
-            exampleEmbed.WithTitle("Testing Title");
-
-            exampleEmbed.ImageUrl = example;
-
-            var channel = Context.Channel;
-            await channel.SendMessageAsync(" ", false, exampleEmbed.Build());
-            
-
-            //await channel.SendMessageAsync(example, false, Discord.Embed);
-
-            //await ReplyAsync(example);
-        }*/
 
         [Command("face")]
         [Summary("Detects faces in an image")]
         public async Task Face(params string[] args)
         {
-
             var channel = Context.Channel;
             var message = Context.Message.Content;
             var outputFile = "./external_resources/facialOutput.jpg";
@@ -126,7 +62,6 @@ namespace CorngoBot
             else
             {
                 String url = args[0];
-
 
                 //Check if argument is a valid URL, then chek if it is a valid image
                 if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
@@ -187,20 +122,7 @@ namespace CorngoBot
 
                 message += "been given an L by **" + Context.User.Username + "**";
 
-                List<String> lLinks = Program.lLinks;
-
-                var embedSettings = new EmbedBuilder();
-                var color = randomColorHex();
-
-                Random rnd = new Random();
-                var rndImg = rnd.Next(0, lLinks.Count);
-
-                embedSettings.WithColor(color);
-                embedSettings.ImageUrl = lLinks[rndImg];
-                embedSettings.WithDescription(message);
-
-                var channel = Context.Channel;
-                await channel.SendMessageAsync("", false, embedSettings.Build());
+                await ReplyImgur("KUI6MZH", message);
             }
         }
 
@@ -209,16 +131,10 @@ namespace CorngoBot
         [Summary("Congratulate someone")]
         public async Task Congrats(params string[] args)
         {
-            var embedSettings = new EmbedBuilder();
-            var color = randomColorHex();
-
-            embedSettings.WithColor(color);
-            embedSettings.ImageUrl = "https://i.imgur.com/6I5BfqZ.gif";
-
             //Check if any parameters have been passed
             if (args.Length == 0)
             {
-                await ReplyAsync(null, false, embedSettings.Build());
+                await ReplyImgur("nK0zEGm");
             }
             else
             {
@@ -242,9 +158,7 @@ namespace CorngoBot
                    "How to use command: <Congrats @user```";
                 }
 
-                embedSettings.WithDescription(message);
-
-                await ReplyAsync(null, false, embedSettings.Build());
+                await ReplyImgur("nK0zEGm", message);
             }
         }
 
@@ -252,21 +166,10 @@ namespace CorngoBot
         [Summary("Call someone pathetic")]
         public async Task Pathetic(params string[] args)
         {
-            List<String> patheticLinks = Program.patheticLinks;
-
-            Random rnd = new Random();
-            var rndImg = rnd.Next(0, patheticLinks.Count);
-
-            var embedSettings = new EmbedBuilder();
-            var color = randomColorHex();
-
-            embedSettings.WithColor(color);
-            embedSettings.ImageUrl = patheticLinks[rndImg];
-
             //Check if any parameters have been passed
             if (args.Length < 1)
             {
-                await ReplyAsync(null, false, embedSettings.Build());
+                await ReplyImgur("YwIq1sg");
             }
             else
             {
@@ -280,16 +183,16 @@ namespace CorngoBot
                 {
                     var user = Context.Client.GetUserAsync(userID);
 
-                    message += "<@" + user.Result.Id + ">  ";
+                    message += user.Result.Username + "  ";
                     numUsersMentioned += 1;
                 }
 
                 if (numUsersMentioned == 0)
                 {
-                    await ReplyAsync(null, false, embedSettings.Build());
+                    await ReplyImgur("YwIq1sg");
                 }
 
-                await ReplyAsync(message, false, embedSettings.Build());
+                await ReplyImgur("YwIq1sg", message);
             }
         }
 
@@ -379,12 +282,17 @@ namespace CorngoBot
             }
         }
 
+        [Command("smug")]
+        [Summary("Posts a smug face")]
+        public async Task Smug()
+        {
+            await ReplyImgur("PXb9l");
+        }
+
         [Command("help")]
+        [Summary("Shows all available commands")]
         public async Task Help(params string[] args)
         {
-            var channel = Context.Channel;
-            var commandList = _service.Commands;
-
             if (Context.User.Id.ToString() == "528853927471480833")
             {
                 var embedSettings = new EmbedBuilder();
@@ -394,28 +302,15 @@ namespace CorngoBot
                 embedSettings.ImageUrl = "https://cdn.discordapp.com/attachments/673330432569376791/682786212167155747/JPEG_20200227_210834.jpg";
                 embedSettings.WithTitle("L");
 
-                await channel.SendMessageAsync("The only help you need is beating **Corngo** in a fighting game", false, embedSettings.Build());
+                await ReplyAsync("The only help you need is beating **Corngo** in a fighting game", false, embedSettings.Build());
             }
             else
             {
+                //Get the list of commands in the server and then sort them
+                var commandList = _service.Commands;
+                commandList = commandList.OrderBy(s => s.Name);
+
                 StringBuilder message = new StringBuilder("```");
-                /*StreamReader helpTxtFile = new StreamReader(@"./external_resources/helpMenu.txt");
-                string currLine;
-
-                while ((currLine = helpTxtFile.ReadLine()) != null)
-                {
-                    String[] currLineArr = currLine.Split("~");
-
-                    String command = currLineArr[0];
-                    String description = currLineArr[1];
-
-                    message.AppendLine(String.Format("{0,-25}{1}", command, description));
-                }
-
-                helpTxtFile.Close();
-                helpTxtFile.Dispose();
-
-                message.AppendLine("```");*/
 
                 foreach(var commands in commandList)
                 {
@@ -423,9 +318,26 @@ namespace CorngoBot
                 }
 
                 message.Append("```");
-                await channel.SendMessageAsync(message.ToString());
+                await ReplyAsync(message.ToString());
             }
+        }
 
+        //Reply to user with an imgur image
+        //Used by commands that grab images from imgur
+        public async Task ReplyImgur(String albumID, String message = null)
+        {
+            var images = await _imgurEndpoint.GetAlbumImagesAsync(albumID);
+
+            var embedSettings = new EmbedBuilder();
+            var color = randomColorHex();
+
+            Random rnd = new Random();
+            var rndImg = rnd.Next(0, images.Count());
+
+            embedSettings.WithColor(color);
+            embedSettings.ImageUrl = images.ElementAt(rndImg).Link;
+
+            await ReplyAsync(message, false, embedSettings.Build());
         }
 
         //Generate a random color hex value
